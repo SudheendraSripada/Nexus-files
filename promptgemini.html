@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS - Automation Prompt Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #050505;
+    --surface: rgba(255,255,255,0.04);
+    --surface2: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --cyan: #00f5ff;
+    --magenta: #ff2a6d;
+    --amber: #ffb830;
+    --green: #00ff88;
+    --silver: #c8d0e0;
+    --text: #e8eaf0;
+    --muted: #7a7f8e;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body, #app {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  #app { padding: 20px 16px 40px; max-width: 1200px; margin: 0 auto; }
+
+  .hero {
+    text-align: center;
+    padding: 28px 0 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    border: 1px solid rgba(0,245,255,0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--silver) 50%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .tab:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+  .tab.active {
+    background: rgba(0,245,255,0.08);
+    border-color: rgba(0,245,255,0.4);
+    color: var(--cyan);
+  }
+
+  .section { display: none; animation: fadeIn 0.3s ease-out; }
+  .section.active { display: block; }
+  
+  @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--border2); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cyan);
+    line-height: 1.3;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  .badge-design { background: rgba(255,42,109,0.12); color: var(--magenta); border: 1px solid rgba(255,42,109,0.25); }
+  .badge-backend { background: rgba(0,245,255,0.08); color: var(--cyan); border: 1px solid rgba(0,245,255,0.2); }
+  .badge-make { background: rgba(255,184,48,0.1); color: var(--amber); border: 1px solid rgba(255,184,48,0.25); }
+  .badge-auth { background: rgba(0,255,136,0.08); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+  .badge-infra { background: rgba(200,208,224,0.08); color: var(--silver); border: 1px solid rgba(200,208,224,0.2); }
+
+  .prompt-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: #b8c0d0;
+    position: relative;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  .copy-btn:hover { background: rgba(0,245,255,0.1); color: var(--cyan); border-color: rgba(0,245,255,0.4); }
+
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .tool-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .tool-chip .tool-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .tool-chip .tool-role {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .tool-chip.cyan { border-color: rgba(0,245,255,0.25); }
+  .tool-chip.cyan .tool-name { color: var(--cyan); }
+  .tool-chip.magenta { border-color: rgba(255,42,109,0.25); }
+  .tool-chip.magenta .tool-name { color: var(--magenta); }
+  .tool-chip.amber { border-color: rgba(255,184,48,0.25); }
+  .tool-chip.amber .tool-name { color: var(--amber); }
+
+  .learn-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+  }
+
+  .learn-num {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 700;
+    min-width: 40px;
+    line-height: 1;
+  }
+
+  .learn-title {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .learn-desc {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+
+  .highlight { color: var(--cyan); font-weight: 500; }
+  .highlight-m { color: var(--magenta); font-weight: 500; }
+  .highlight-a { color: var(--amber); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="hero">
+    <div class="hero-tag">NEXUS Build Kit — Custom Prompt Library v1.0</div>
+    <h1>Omnichannel Lead Magnet Engine<br>— The "Single-Go" Blueprint</h1>
+    <p>A hybrid architecture leveraging <strong>Python/Replit</strong> for a seamless "Claude-like" User Experience (OAuth) and <strong>Make.com</strong> as the heavy-lifting logic engine for scalable delivery.</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('design')">1. Design Prompts</div>
+    <div class="tab" onclick="switchTab('backend')">2. Core Backend (Auth)</div>
+    <div class="tab" onclick="switchTab('make')">3. Make.com Engine</div>
+    <div class="tab" onclick="switchTab('tools')">Tool Stack</div>
+    <div class="tab" onclick="switchTab('learn')">Learning Roadmap</div>
+  </div>
+
+  <!-- 1. DESIGN PROMPTS -->
+  <div id="section-design" class="section active">
+    <div class="section-title">Design System & UI Prompts (Use in Stitch / v0.dev)</div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">01 — Global Tech-Noir Theme Definition</div>
+        <div class="badge badge-design">Design</div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">Paste this first into any UI generator to lock in the aesthetic.</p>
+      <div class="prompt-box">
+<button class="copy-btn" onclick="copyText(this)">COPY</button>Act as an expert UI/UX designer. I am building "NEXUS," a seamless social media automation SaaS. Apply this strict "Tech-Noir" design system to all generated components:
+
+COLORS:
+  - Background: #050505 (Deep Obsidian)
+  - Surface panels: rgba(255,255,255,0.04) with blur(16px) backdrop-filter.
+  - Borders: 1px solid rgba(255,255,255,0.08)
+  - Primary Text: #e8eaf0
+  - Accents: Cyber-Cyan (#00f5ff), Magenta (#ff2a6d), Amber (#ffb830).
+
+TYPOGRAPHY:
+  - Headings: 'JetBrains Mono', bold. Use subtle linear gradients (Cyan to Silver) for primary headers.
+  - Body: 'Space Grotesk', regular.
+  - Buttons/Labels: 'JetBrains Mono', uppercase, 2px letter spacing.
+
+UX RULES:
+  - No stark white backgrounds. 
+  - Glassmorphism is heavily utilized for cards.
+  - Hover states should trigger a soft outer glow (e.g., box-shadow: 0 0 20px rgba(0, 245, 255, 0.15)).
+  - Keep the interface extremely minimal. Hide complexity.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">02 — The "Claude-Like" Single-Go Connect UI</div>
+        <div class="badge badge-auth">Auth UI</div>
+      </div>
+      <div class="prompt-box">
+<button class="copy-btn" onclick="copyText(this)">COPY</button>Generate the main "One-Click Connect" dashboard for NEXUS using the Tech-Noir system. 
+This must feel exactly like authorizing Claude or ChatGPT—zero technical friction.
+
+LAYOUT:
+  - Centered vertically and horizontally. 
+  - A sleek, glassmorphic center card (max-width: 500px).
+  - Headline: "Authorize once. Automate forever."
+  - Sub-text: "Select your platform to deploy the SkillTracker asset."
+
+INTERACTIVE ELEMENTS:
+  - Three large, horizontal button-cards stacked vertically.
+  - Card 1: "Connect LinkedIn" (Cyan glow on hover)
+  - Card 2: "Connect Instagram" (Magenta glow on hover)
+  - Card 3: "Connect Gmail" (Silver glow on hover)
+
+BEHAVIOR STATE:
+  - When a user clicks a button, replace the text with a spinning loader and the word "Authenticating...".
+  - Below the buttons, add a section called "Active Payload". Inside it, a small sleek card showing a PDF icon and the text "SkillTracker_Architecture_Guide.pdf". 
+  - Provide a text input below it labeled "Trigger Keyword" with a default placeholder of "DEPLOY".</div>
+    </div>
+  </div>
+
+  <!-- 2. CORE BACKEND -->
+  <div id="section-backend" class="section">
+    <div class="section-title">Backend & Routing Prompts (Use in Replit Agent / Cursor)</div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">03 — Replit Python Auth & Forwarding Engine</div>
+        <div class="badge badge-backend">Python Logic</div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">This is the "Face" of the app. It handles the OAuth, saves the user, and securely passes data to Make.com.</p>
+      <div class="prompt-box">
+<button class="copy-btn" onclick="copyText(this)">COPY</button>Act as an expert Python backend developer. Build a Flask backend for my app "NEXUS".
+Constraint: Ensure the code is procedural and easy to read. Use nested if-else statements for routing logic where applicable.
+
+ARCHITECTURE GOAL:
+This app sits between the User and Make.com. It handles the OAuth login for LinkedIn/Google, stores the token, and provides a webhook receiver that forwards verified payloads to Make.com.
+
+ENDPOINTS REQUIRED:
+1. `GET /auth/<platform>`: 
+   - Initiates standard OAuth 2.0 flow for 'linkedin' or 'gmail'. Redirects to the respective provider.
+2. `GET /callback/<platform>`: 
+   - Catches the code, exchanges it for an access_token.
+   - Saves the access_token securely into a Supabase database table called `user_tokens`.
+   - Redirects the user to `/success`.
+3. `POST /nexus-receiver`: 
+   - This endpoint receives incoming comment data (e.g., from an Apify scraper).
+   - Extracts the `user_id`, `platform`, `comment_text`, and `profile_url`.
+   - Logic: 
+     If `comment_text` contains "DEPLOY":
+       - Fetch the user's stored access_token from Supabase.
+       - Package the token, platform, and profile_url into a JSON payload.
+       - Use the `requests` library to POST this JSON to my Make.com Custom Webhook URL.
+     Else:
+       - Ignore the comment and return a 200 OK.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">04 — Supabase Schema Generation</div>
+        <div class="badge badge-infra">Database</div>
+      </div>
+      <div class="prompt-box">
+<button class="copy-btn" onclick="copyText(this)">COPY</button>Generate the SQL required to create a Supabase PostgreSQL database for NEXUS.
+
+I need three tables:
+1. `users`: id (uuid), email, created_at
+2. `oauth_tokens`: id, user_id (foreign key), platform (text), access_token (encrypted text), refresh_token, expires_at.
+3. `automations`: id, user_id, trigger_keyword (e.g., 'DEPLOY'), asset_link (e.g., Google Drive link to SkillTracker PDF), is_active (boolean).
+
+Include Row Level Security (RLS) policies allowing users to only read and update their own tokens and automations.</div>
+    </div>
+  </div>
+
+  <!-- 3. MAKE.COM ENGINE -->
+  <div id="section-make" class="section">
+    <div class="section-title">Make.com Architecture (The Execution Muscle)</div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">05 — AI Prompt to generate your Make.com Blueprint</div>
+        <div class="badge badge-make">Make.com Logic</div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">Since Make.com is visual, feed this prompt into Claude or ChatGPT to get step-by-step module configuration tailored for your SkillTracker project.</p>
+      <div class="prompt-box">
+<button class="copy-btn" onclick="copyText(this)">COPY</button>Act as a Make.com (Integromat) Certified Expert. I need a precise blueprint configuration to handle the "Delivery Engine" for my NEXUS SaaS.
+
+CONTEXT:
+My Python backend is handling the OAuth and keyword filtering. When someone comments "DEPLOY", my Python app sends a clean JSON payload to this Make.com scenario.
+
+INCOMING WEBHOOK PAYLOAD EXPECTED:
+{
+  "platform": "linkedin",
+  "recipient_id": "urn:li:person:12345",
+  "post_id": "urn:li:activity:67890",
+  "asset_link": "https://drive.google.com/skilltracker",
+  "access_token": "user_oauth_token_from_db"
+}
+
+GENERATE THE MAKE.COM MODULE CONFIGURATION FOR
